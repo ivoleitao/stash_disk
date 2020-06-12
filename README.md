@@ -46,20 +46,20 @@ The example bellow creates a cache with a disk storage backend that supports a m
   import 'dart:io';
   import 'package:stash_disk/stash_disk.dart';
 
-  class User {
+  class Task {
     final int id;
     final String title;
     final bool completed;
 
-    User({this.id, this.title, this.completed = false});
+    Task({this.id, this.title, this.completed = false});
 
-    /// Creates a [User] from json map
-    factory User.fromJson(Map<String, dynamic> json) => User(
+    /// Creates a [Task] from json map
+    factory Task.fromJson(Map<String, dynamic> json) => Task(
         id: json['id'] as int,
         title: json['title'] as String,
         completed: json['completed'] as bool);
 
-    /// Creates a json map from a [User]
+    /// Creates a json map from a [Task]
     Map<String, dynamic> toJson() =>
         <String, dynamic>{'id': id, 'title': title, 'completed': completed};
 
@@ -75,13 +75,13 @@ The example bellow creates a cache with a disk storage backend that supports a m
 
     // Creates cache with a disk based storage backend with the capacity of 10 entries 
     final cache = newDiskCache(path,
-        maxEntries: 10, fromEncodable: (json) => User.fromJson(json));
+        maxEntries: 10, fromEncodable: (json) => Task.fromJson(json));
 
-    // Adds a user with key 'user1' to the cache
+    // Adds a task with key 'task1' to the cache
     await cache.put(
-        'user1', User(id: 1, title: 'Run stash example', completed: true));
-    // Retrieves the user from the cache
-    final value = await cache.get('user1');
+        'task', Task(id: 1, title: 'Run stash example', completed: true));
+    // Retrieves the task from the cache
+    final value = await cache.get('task1');
 
     print(value);
   }

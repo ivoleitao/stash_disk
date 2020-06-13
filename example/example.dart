@@ -33,11 +33,11 @@ void main() async {
   final cache = newDiskCache(path,
       maxEntries: 10, fromEncodable: (json) => Task.fromJson(json));
 
-  // Adds a user with key 'user1' to the cache
+  // Adds a task with key 'task1' to the cache
   await cache.put(
-      'user1', Task(id: 1, title: 'Run stash_disk example', completed: true));
+      'task1', Task(id: 1, title: 'Run stash_disk example', completed: true));
   // Retrieves the value from the cache
-  final value = await cache.get('user1');
+  final value = await cache.get('task1');
 
   print(value);
 }

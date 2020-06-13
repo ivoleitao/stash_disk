@@ -90,7 +90,7 @@ The example bellow creates a cache with a disk storage backend that supports a m
 
 ## Contributing
 
-It is developed by best effort, in the motto of "Scratch your own itch!", meaning APIs that are meaningful for the author use cases.
+This library is developed by best effort, in the motto of "Scratch your own itch!", meaning APIs that are meaningful for the author use cases.
 
 If you would like to contribute with other parts of the API, feel free to make a [Github pull request](https://github.com/ivoleitao/stash_disk/pulls) as I'm always looking for contributions for:
 * Tests

@@ -1,5 +1,5 @@
 # stash_disk
-A [Stash](https://pub.dartlang.org/packages/stash) Disk storage extension
+A [stash](https://pub.dartlang.org/packages/stash) disk storage extension
 
 [![Pub Package](https://img.shields.io/pub/v/stash_disk.svg?style=flat-square)](https://pub.dartlang.org/packages/stash_disk)
 [![Build Status](https://github.com/ivoleitao/shadertoy_api/workflows/build/badge.svg)](https://github.com/ivoleitao/stash_disk/actions)

@@ -18,7 +18,7 @@ export 'src/disk/disk_store.dart';
 /// * [codec]: The [CacheCodec] used to convert to/from a Map<String, dynamic>` representation to a binary representation
 /// * [fromEncodable]: A custom function the converts to the object from a `Map<String, dynamic>` representation
 ///
-/// Returns a new [Cache]
+/// Returns a new [Cache] backed by a [DiskStore]
 Cache newDiskCache(String path,
     {String cacheName,
     ExpiryPolicy expiryPolicy,

@@ -17,7 +17,7 @@ Add this to your `pubspec.yaml` (or create it):
 
 ```dart
 dependencies:
-    stash_disk: ^1.0.0-dev.1
+    stash_disk: ^1.0.0-dev.2
 ```
 
 Run the following command to install dependencies:
@@ -101,7 +101,7 @@ If you would like to contribute with other parts of the API, feel free to make a
 
 Please file feature requests and bugs at the [issue tracker][tracker].
 
-[tracker]: http://github.com/ivoleitao/stash_disk/issues/new
+[tracker]: https://github.com/ivoleitao/stash_disk/issues/new
 
 ## License
 

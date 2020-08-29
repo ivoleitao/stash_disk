@@ -1,5 +1,5 @@
 name: stash_disk
-version: 1.0.0-dev.3
+version: 1.0.0-dev.4
 description: >-
   Disk storage extension for the stash caching API. Provides support to store caches
   in the local file system in binary format using the msgpack json format

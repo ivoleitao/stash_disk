@@ -1,5 +1,4 @@
-import 'dart:io';
-
+import 'package:file/memory.dart';
 import 'package:stash/stash_harness.dart';
 import 'package:stash_disk/stash_disk.dart';
 import 'package:test/test.dart';
@@ -11,9 +10,10 @@ class DefaultContext extends TestContext<DiskStore> {
 
   @override
   Future<DiskStore> newStore() {
-    return Directory.systemTemp
-        .createTemp('stash_disk')
-        .then((d) => DiskStore(d.path, fromEncodable: fromEncodable));
+    final fs = MemoryFileSystem();
+
+    return fs.systemTempDirectory.createTemp('stash_disk').then((d) =>
+        DiskStore(MemoryFileSystem(), d.path, fromEncodable: fromEncodable));
   }
 
   @override

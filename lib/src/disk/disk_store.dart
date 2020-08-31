@@ -1,7 +1,7 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:file/file.dart';
 import 'package:path/path.dart' as p;
 import 'package:stash/stash_api.dart';
 import 'package:stream_transform/stream_transform.dart';
@@ -10,6 +10,9 @@ import 'package:stream_transform/stream_transform.dart';
 class DiskStore extends CacheStore {
   /// The size in bytes of the cache entry header
   static const int _header_size = uint64_size * 5;
+
+  /// The base location of the disk storage
+  final FileSystem _fs;
 
   /// The base location of the disk storage
   final String _path;
@@ -25,11 +28,11 @@ class DiskStore extends CacheStore {
   final Map<String, Directory> _cacheDirectoryMap = {};
 
   /// Builds a [DiskStore].
-  ///
+  /// * [_fs]: The [FileSystem]
   /// * [_path]: The base location of the disk storage
   /// * [codec]: The [CacheCodec] used to convert to/from a Map<String, dynamic>` representation to binary representation
   /// * [fromEncodable]: A custom function the converts to the object from a `Map<String, dynamic>` representation
-  DiskStore(this._path,
+  DiskStore(this._fs, this._path,
       {CacheCodec codec, dynamic Function(Map<String, dynamic>) fromEncodable})
       : assert(_path != null),
         _codec = codec ?? const MsgpackCodec(),
@@ -44,7 +47,8 @@ class DiskStore extends CacheStore {
     if (_cacheDirectoryMap.containsKey(name)) {
       return Future.value(_cacheDirectoryMap[name]);
     } else {
-      return Directory(p.join(_path, name))
+      return _fs
+          .directory(p.join(_path, name))
           .create(recursive: true)
           .then((cacheDirectory) {
         _cacheDirectoryMap[name] = cacheDirectory;
@@ -61,7 +65,7 @@ class DiskStore extends CacheStore {
   ///
   /// Returns the [File] that stores the named cache key
   File _cacheFile(String name, String key) {
-    return File(p.join(_path, name, key));
+    return _fs.file(p.join(_path, name, key));
   }
 
   /// Returns the [File] that stores a cache key under the provided cache directory
@@ -71,7 +75,7 @@ class DiskStore extends CacheStore {
   ///
   /// Returns the [File] that stores the cache key under the provided cache directory
   File _cacheDirectoryFile(Directory cacheDirectory, String key) {
-    return File(p.join(cacheDirectory.path, key));
+    return _fs.file(p.join(cacheDirectory.path, key));
   }
 
   /// Returns the full list of cache files under a named directory
@@ -110,15 +114,15 @@ class DiskStore extends CacheStore {
 
   @override
   Future<Iterable<CacheStat>> stats(String name) =>
-      _cacheFiles(name, (FileSystemEntity fse) => _getStat(File(fse.path)));
+      _cacheFiles(name, (FileSystemEntity fse) => _getStat(_fs.file(fse.path)));
 
   @override
-  Future<Iterable<CacheEntry>> values(String name) =>
-      _cacheFiles(name, (FileSystemEntity fse) => _getEntry(File(fse.path)));
+  Future<Iterable<CacheEntry>> values(String name) => _cacheFiles(
+      name, (FileSystemEntity fse) => _getEntry(_fs.file(fse.path)));
 
   @override
   Future<Iterable<CacheStat>> getStats(String name, Iterable<String> keys) =>
-      _cacheFiles(name, (FileSystemEntity fse) => _getStat(File(fse.path)),
+      _cacheFiles(name, (FileSystemEntity fse) => _getStat(_fs.file(fse.path)),
           predicate: (fse) => keys.contains(p.basename(fse.path)));
 
   @override

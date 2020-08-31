@@ -1,6 +1,6 @@
 ## 1.0.0-dev.4
 
-- TODO
+- Abstracted the filesystem through the use of the package file
 
 ## 1.0.0-dev.3
 

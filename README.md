@@ -43,7 +43,6 @@ import 'package:stash_disk/stash_disk.dart';
 The example bellow creates a cache with a disk storage backend that supports a maximum of 10 `Task` objects. In the rather simple example bellow the serialization and deserialization of the object is coded by hand but normally it relies on the usage of libraries like [json_serializable](https://pub.dev/packages/json_serializable). Please take a look at the documentation of [stash](https://pub.dartlang.org/packages/stash) to gather additional information and to explore the full range of capabilities of the `stash` library
 
 ```dart
-  import 'package:file/local.dart';
   import 'package:stash_disk/stash_disk.dart';
 
   class Task {
@@ -70,15 +69,9 @@ The example bellow creates a cache with a disk storage backend that supports a m
   }
 
   void main() async {
-    // Local filesystem
-    final fs = const LocalFileSystem();
-
-    // Temporary path
-    final path = fs.systemTempDirectory.path;
-
-    // Creates cache with a disk based storage backend with the capacity of 10 entries
-    final cache = newDiskCache(const LocalFileSystem(), path,
-        maxEntries: 10, fromEncodable: (json) => Task.fromJson(json));
+  // Creates a cache on the local storage with the capacity of 10 entries
+  final cache = newLocalDiskCache(
+      maxEntries: 10, fromEncodable: (json) => Task.fromJson(json));
 
     // Adds a task with key 'task1' to the cache
     await cache.put(

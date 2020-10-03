@@ -34,7 +34,8 @@ class DiskStore extends CacheStore {
   /// * [fromEncodable]: A custom function the converts to the object from a `Map<String, dynamic>` representation
   DiskStore(this._fs, this._path,
       {CacheCodec codec, dynamic Function(Map<String, dynamic>) fromEncodable})
-      : assert(_path != null),
+      : assert(_fs != null),
+        assert(_path != null),
         _codec = codec ?? const MsgpackCodec(),
         _fromEncodable = fromEncodable;
 

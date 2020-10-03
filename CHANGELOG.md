@@ -1,6 +1,9 @@
-## 1.0.0-dev.5
+## 1.0.0
 
-- TODO
+- First official release
+- Updated to 2.10.0 sdk version
+- Updated dependencies
+- FileSystem is now optional, defaults to the temporary folder
 
 ## 1.0.0-dev.4
 

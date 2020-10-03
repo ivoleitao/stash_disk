@@ -1,4 +1,3 @@
-import 'package:file/local.dart';
 import 'package:stash_disk/stash_disk.dart';
 
 class Task {
@@ -25,14 +24,8 @@ class Task {
 }
 
 void main() async {
-  // Local filesystem
-  final fs = const LocalFileSystem();
-
-  // Temporary path
-  final path = fs.systemTempDirectory.path;
-
-  // Creates cache with a disk based storage backend with the capacity of 10 entries
-  final cache = newDiskCache(const LocalFileSystem(), path,
+  // Creates a cache on the local storage with the capacity of 10 entries
+  final cache = newLocalDiskCache(
       maxEntries: 10, fromEncodable: (json) => Task.fromJson(json));
 
   // Adds a task with key 'task1' to the cache

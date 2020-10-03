@@ -12,7 +12,7 @@ dependencies:
   path: ^1.7.0
   file: ^5.2.1
   stream_transform: ^1.2.0
-  stash: ^1.0.0
+  stash: ^1.0.2
   #stash:
   #  path: ../stash
 

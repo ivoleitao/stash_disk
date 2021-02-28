@@ -23,15 +23,15 @@ export 'src/disk/disk_store.dart';
 ///
 /// Returns a new [Cache] backed by a [DiskStore]
 Cache newMemoryDiskCache(
-    {String path,
-    String cacheName,
-    ExpiryPolicy expiryPolicy,
-    KeySampler sampler,
-    EvictionPolicy evictionPolicy,
-    int maxEntries,
-    CacheLoader cacheLoader,
-    CacheCodec codec,
-    dynamic Function(dynamic) fromEncodable}) {
+    {String? path,
+    String? cacheName,
+    ExpiryPolicy? expiryPolicy,
+    KeySampler? sampler,
+    EvictionPolicy? evictionPolicy,
+    int? maxEntries,
+    CacheLoader? cacheLoader,
+    CacheCodec? codec,
+    dynamic Function(dynamic)? fromEncodable}) {
   FileSystem fs = MemoryFileSystem();
   return Cache.newCache(
       DiskStore(fs, path ?? fs.systemTempDirectory.path,
@@ -58,15 +58,15 @@ Cache newMemoryDiskCache(
 ///
 /// Returns a new [Cache] backed by a [DiskStore]
 Cache newLocalDiskCache(
-    {String path,
-    String cacheName,
-    ExpiryPolicy expiryPolicy,
-    KeySampler sampler,
-    EvictionPolicy evictionPolicy,
-    int maxEntries,
-    CacheLoader cacheLoader,
-    CacheCodec codec,
-    dynamic Function(dynamic) fromEncodable}) {
+    {String? path,
+    String? cacheName,
+    ExpiryPolicy? expiryPolicy,
+    KeySampler? sampler,
+    EvictionPolicy? evictionPolicy,
+    int? maxEntries,
+    CacheLoader? cacheLoader,
+    CacheCodec? codec,
+    dynamic Function(dynamic)? fromEncodable}) {
   FileSystem fs = const LocalFileSystem();
   return Cache.newCache(
       DiskStore(fs, path ?? fs.systemTempDirectory.path,

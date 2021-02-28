@@ -22,7 +22,7 @@ class DiskStore extends CacheStore {
 
   /// The function that converts between the Map representation to the
   /// object stored in the cache
-  final dynamic Function(Map<String, dynamic>) _fromEncodable;
+  final dynamic Function(Map<String, dynamic>)? _fromEncodable;
 
   /// List of cache directories per cache name
   final Map<String, Directory> _cacheDirectoryMap = {};
@@ -33,10 +33,9 @@ class DiskStore extends CacheStore {
   /// * [codec]: The [CacheCodec] used to convert to/from a Map<String, dynamic>` representation to binary representation
   /// * [fromEncodable]: A custom function the converts to the object from a `Map<String, dynamic>` representation
   DiskStore(this._fs, this._path,
-      {CacheCodec codec, dynamic Function(Map<String, dynamic>) fromEncodable})
-      : assert(_fs != null),
-        assert(_path != null),
-        _codec = codec ?? const MsgpackCodec(),
+      {CacheCodec? codec,
+      dynamic Function(Map<String, dynamic>)? fromEncodable})
+      : _codec = codec ?? const MsgpackCodec(),
         _fromEncodable = fromEncodable;
 
   /// Returns the [Directory] where a cache is stored or creates it under the base path
@@ -88,12 +87,12 @@ class DiskStore extends CacheStore {
   /// Returns a list of cache files filtered and converted according with the provided parameters
   Future<List<E>> _cacheFiles<E>(
       String name, FutureOr<E> Function(File) convert,
-      {bool Function(FileSystemEntity fse) predicate}) {
-    predicate ??= (fse) => true;
+      {bool Function(FileSystemEntity fse)? predicate}) {
+    final filter = predicate ?? ((fse) => true);
     return _cacheDirectory(name).then((cacheDirectory) => cacheDirectory
         .list()
         .asyncWhere((fse) => fse.stat().then((FileStat fstat) =>
-            fstat.type == FileSystemEntityType.file && predicate(fse)))
+            fstat.type == FileSystemEntityType.file && filter(fse)))
         .cast<File>()
         .asyncMap(convert)
         .toList());
@@ -114,15 +113,15 @@ class DiskStore extends CacheStore {
   Future<Iterable<String>> keys(String name) => _getKeys(name);
 
   @override
-  Future<Iterable<CacheStat>> stats(String name) =>
-      _cacheFiles(name, (FileSystemEntity fse) => _getStat(_fs.file(fse.path)));
+  Future<Iterable<CacheStat>> stats(String name) => _cacheFiles(
+      name, (FileSystemEntity fse) => _readFileStat(_fs.file(fse.path)));
 
   @override
   Future<Iterable<CacheEntry>> values(String name) => _cacheFiles(
-      name, (FileSystemEntity fse) => _getEntry(_fs.file(fse.path)));
+      name, (FileSystemEntity fse) => _readFileEntry(_fs.file(fse.path)));
 
   @override
-  Future<Iterable<CacheStat>> getStats(String name, Iterable<String> keys) =>
+  Future<Iterable<CacheStat?>> getStats(String name, Iterable<String> keys) =>
       _cacheFiles(name, (FileSystemEntity fse) => _getStat(_fs.file(fse.path)),
           predicate: (fse) => keys.contains(p.basename(fse.path)));
 
@@ -151,12 +150,17 @@ class DiskStore extends CacheStore {
     var updateTime = DateTime.fromMicrosecondsSinceEpoch(reader.readUInt64());
     var hitCount = reader.readUInt64();
 
-    return CacheStat(key, expiryTime,
-        creationTime: creationTime,
-        accessTime: accessTime,
-        updateTime: updateTime,
-        hitCount: hitCount);
+    return CacheStat(key, expiryTime, creationTime,
+        accessTime: accessTime, updateTime: updateTime, hitCount: hitCount);
   }
+
+  Future<CacheStat> _readFileStat(File file) =>
+      file.open(mode: FileMode.read).then((f) {
+        return f
+            .read(_header_size)
+            .then(((bytes) => _readStat(p.basename(file.path), bytes)))
+            .whenComplete(() => f.close());
+      });
 
   /// Creates a [CacheStat] from the provided [File]
   ///
@@ -164,21 +168,15 @@ class DiskStore extends CacheStore {
   /// * [checkFile]: If the existence of the file should be checked, defaults to false
   ///
   /// Returns a [CacheStat]
-  Future<CacheStat> _getStat(File file, {bool checkFile = false}) {
-    final statGet = (bool readFile) => readFile
-        ? file.open(mode: FileMode.read).then((f) {
-            return f
-                .read(_header_size)
-                .then(((bytes) => _readStat(p.basename(file.path), bytes)))
-                .whenComplete(() => f.close());
-          })
-        : Future.value(null);
+  Future<CacheStat?> _getStat(File file, {bool checkFile = false}) {
+    final statGet =
+        (bool readFile) => readFile ? _readFileStat(file) : Future.value(null);
 
     return checkFile ? file.exists().then(statGet) : statGet(true);
   }
 
   @override
-  Future<CacheStat> getStat(String name, String key) {
+  Future<CacheStat?> getStat(String name, String key) {
     return _getStat(_cacheFile(name, key), checkFile: true);
   }
 
@@ -188,7 +186,7 @@ class DiskStore extends CacheStore {
   /// * [writer]: An optional instance of the [BytesWriter] in case it was already instanciated.
   ///
   /// Returns the provided [BytesWriter] or a new one after writing [CacheStat] into it
-  BytesWriter _writeStat(CacheStat stat, {BytesWriter writer}) {
+  BytesWriter _writeStat(CacheStat stat, {BytesWriter? writer}) {
     writer = writer ?? _codec.encoder();
 
     writer.writeUint64(stat.expiryTime.microsecondsSinceEpoch);
@@ -226,12 +224,18 @@ class DiskStore extends CacheStore {
     var hitCount = reader.readUInt64();
     var value = reader.read();
 
-    return CacheEntry(key, value, expiryTime,
-        creationTime: creationTime,
-        accessTime: accessTime,
-        updateTime: updateTime,
-        hitCount: hitCount);
+    return CacheEntry(key, value, expiryTime, creationTime,
+        accessTime: accessTime, updateTime: updateTime, hitCount: hitCount);
   }
+
+  /// Reads a [CacheEntry] from the provided [File]
+  ///
+  /// * [file]: The cache [File]
+  ///
+  /// Returns a [CacheEntry]
+  Future<CacheEntry> _readFileEntry(File file) => file
+      .readAsBytes()
+      .then((bytes) => _readEntry(p.basename(file.path), bytes));
 
   /// Gets a [CacheEntry] from the provided [File]
   ///
@@ -239,18 +243,15 @@ class DiskStore extends CacheStore {
   /// * [checkFile]: If the existence of the [File] should be checked
   ///
   /// Returns a [CacheEntry]
-  Future<CacheEntry> _getEntry(File file, {bool checkFile = false}) {
-    final entryGet = (bool readFile) => readFile
-        ? file
-            .readAsBytes()
-            .then((bytes) => _readEntry(p.basename(file.path), bytes))
-        : Future.value(null);
+  Future<CacheEntry?> _getEntry(File file, {bool checkFile = false}) {
+    final entryGet =
+        (bool readFile) => readFile ? _readFileEntry(file) : Future.value(null);
 
     return checkFile ? file.exists().then(entryGet) : entryGet(true);
   }
 
   @override
-  Future<CacheEntry> getEntry(String name, String key) {
+  Future<CacheEntry?> getEntry(String name, String key) {
     return _getEntry(_cacheFile(name, key), checkFile: true);
   }
 
@@ -260,7 +261,7 @@ class DiskStore extends CacheStore {
   /// * [writer]: The optionally provided [BytesWriter]
   ///
   /// Returns the provided [BytesWriter] or a new one after writing [value] into it
-  BytesWriter _writeValue(dynamic value, {BytesWriter writer}) {
+  BytesWriter _writeValue(dynamic value, {BytesWriter? writer}) {
     writer = writer ?? _codec.encoder();
 
     writer.write(value);
@@ -293,7 +294,7 @@ class DiskStore extends CacheStore {
   @override
   Future<void> delete(String name) {
     if (_cacheDirectoryMap.containsKey(name)) {
-      final cacheDirectory = _cacheDirectoryMap[name];
+      final cacheDirectory = _cacheDirectoryMap[name]!;
 
       return cacheDirectory
           .delete(recursive: true)
@@ -306,7 +307,7 @@ class DiskStore extends CacheStore {
   @override
   Future<void> deleteAll() {
     return Future.wait(_cacheDirectoryMap.keys.map((name) {
-      final cacheDirectory = _cacheDirectoryMap[name];
+      final cacheDirectory = _cacheDirectoryMap[name]!;
 
       return cacheDirectory
           .delete(recursive: true)

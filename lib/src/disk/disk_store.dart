@@ -151,11 +151,8 @@ class DiskStore extends CacheStore {
     var updateTime = DateTime.fromMicrosecondsSinceEpoch(reader.readUInt64());
     var hitCount = reader.readUInt64();
 
-    return CacheStat(key, expiryTime,
-        creationTime: creationTime,
-        accessTime: accessTime,
-        updateTime: updateTime,
-        hitCount: hitCount);
+    return CacheStat(key, expiryTime, creationTime,
+        accessTime: accessTime, updateTime: updateTime, hitCount: hitCount);
   }
 
   /// Creates a [CacheStat] from the provided [File]
@@ -226,11 +223,8 @@ class DiskStore extends CacheStore {
     var hitCount = reader.readUInt64();
     var value = reader.read();
 
-    return CacheEntry(key, value, expiryTime,
-        creationTime: creationTime,
-        accessTime: accessTime,
-        updateTime: updateTime,
-        hitCount: hitCount);
+    return CacheEntry(key, value, expiryTime, creationTime,
+        accessTime: accessTime, updateTime: updateTime, hitCount: hitCount);
   }
 
   /// Gets a [CacheEntry] from the provided [File]

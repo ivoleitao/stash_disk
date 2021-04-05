@@ -19,7 +19,7 @@ class Task {
 
   @override
   String toString() {
-    return 'Task ${id}: "${title}" is ${completed! ? "completed" : "not completed"}';
+    return 'Task $id: "$title" is ${completed! ? "completed" : "not completed"}';
   }
 }
 

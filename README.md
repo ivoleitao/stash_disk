@@ -17,7 +17,7 @@ Add this to your `pubspec.yaml` (or create it):
 
 ```dart
 dependencies:
-    stash_disk: ^2.0.0-nullsafety.1
+    stash_disk: ^2.0.0-nullsafety.2
 ```
 
 Run the following command to install dependencies:
